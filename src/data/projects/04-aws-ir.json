@@ -1,0 +1,10 @@
+{
+  "title": "AWS IR Automation",
+  "description": "Experiments in incident response orchestration and automation in AWS.",
+  "url": "https://github.com/zdr4k/aws-ir-automation",
+  "tags": [
+    "AWS",
+    "Incident Response"
+  ],
+  "featured": true
+}

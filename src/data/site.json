@@ -1,0 +1,19 @@
+{
+  "brand": "kelvin.dev",
+  "eyebrow": "SECURITY ENGINEER \u00b7 RESEARCHER \u00b7 BUILDER",
+  "headline": "Building tools. Exploring threats. Engineering security.",
+  "intro": "I work at the intersection of security engineering, automation, and AI \u2014 turning complex security challenges into practical solutions.",
+  "specialties": [
+    "Detection Engineering",
+    "Cloud Security",
+    "Agentic AI"
+  ],
+  "about_title": "A little about me",
+  "about": "I'm Kelvin, a Security Engineer focused on threat detection, incident response, and cloud security. I build tools, experiment with agentic workflows, and share what I learn.",
+  "github": "https://github.com/zdr4k",
+  "linkedin": "https://www.linkedin.com/in/kelvin-santos-b69b211a2/",
+  "medium": "https://medium.com/@kelvinzdk",
+  "show_about": true,
+  "show_research": true,
+  "show_projects": true
+}

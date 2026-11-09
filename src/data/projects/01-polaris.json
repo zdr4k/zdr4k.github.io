@@ -1,0 +1,11 @@
+{
+  "title": "Polaris",
+  "description": "AI-assisted threat hunting from threat intelligence to actionable hunting queries.",
+  "url": "https://github.com/zdr4k/Polaris",
+  "tags": [
+    "AI Agents",
+    "Threat Hunting",
+    "Sentinel"
+  ],
+  "featured": true
+}

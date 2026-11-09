@@ -1,0 +1,58 @@
+media:
+  input: public/images
+  output: /images
+content:
+  - name: homepage
+    label: Homepage
+    type: file
+    path: src/data/site.json
+    format: json
+    fields:
+      - { name: brand, label: Site name, type: string }
+      - { name: eyebrow, label: Small heading, type: string }
+      - { name: headline, label: Main headline, type: string }
+      - { name: intro, label: Introduction, type: text }
+      - name: specialties
+        label: Specialties
+        type: string
+        list: true
+      - { name: show_projects, label: Show projects, type: boolean }
+      - { name: show_research, label: Show research, type: boolean }
+      - { name: show_about, label: Show about, type: boolean }
+      - { name: about_title, label: About heading, type: string }
+      - { name: about, label: About text, type: text }
+      - { name: github, label: GitHub URL, type: string }
+      - { name: linkedin, label: LinkedIn URL, type: string }
+      - { name: medium, label: Medium URL, type: string }
+  - name: projects
+    label: Projects
+    type: collection
+    path: src/data/projects
+    format: json
+    filename: "{primary}.json"
+    view:
+      primary: title
+      fields: [title, featured]
+    fields:
+      - { name: title, label: Project name, type: string, required: true }
+      - { name: description, label: Description, type: text, required: true }
+      - { name: url, label: URL, type: string, required: true }
+      - { name: featured, label: Show on homepage, type: boolean }
+      - name: tags
+        label: Technologies
+        type: string
+        list: true
+  - name: articles
+    label: Research & Writing
+    type: collection
+    path: src/data/articles
+    format: json
+    filename: "{primary}.json"
+    view:
+      primary: title
+      fields: [title, label]
+    fields:
+      - { name: title, label: Title, type: string, required: true }
+      - { name: description, label: Summary, type: text }
+      - { name: url, label: Article URL, type: string, required: true }
+      - { name: label, label: Series or category, type: string }

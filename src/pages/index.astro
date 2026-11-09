@@ -1,0 +1,78 @@
+\
+---
+import site from '../data/site.json';
+import '../styles/global.css';
+
+const projectFiles = import.meta.glob('../data/projects/*.json', { eager: true, import: 'default' });
+const articleFiles = import.meta.glob('../data/articles/*.json', { eager: true, import: 'default' });
+type Item = { title: string; description: string; url: string; tags?: string[]; featured?: boolean; label?: string };
+const projects = (Object.entries(projectFiles) as [string, Item][])
+  .sort(([a],[b]) => a.localeCompare(b))
+  .map(([,value]) => value)
+  .filter(item => item.featured);
+const articles = (Object.entries(articleFiles) as [string, Item][])
+  .sort(([a],[b]) => a.localeCompare(b))
+  .map(([,value]) => value);
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#090a0c" />
+    <meta name="description" content={site.intro} />
+    <meta property="og:title" content="Kelvin Santos — Security Engineer" />
+    <meta property="og:description" content={site.intro} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>Kelvin Santos — Security Engineer</title>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <a class="brand" href="#top" aria-label="Go to top"><span class="logo-mark">⌁</span>{site.brand}</a>
+        <nav aria-label="Main navigation">
+          {site.show_projects && <a href="#projects">Projects</a>}
+          {site.show_research && <a href="#research">Research</a>}
+          {site.show_about && <a href="#about">About</a>}
+        </nav>
+      </header>
+      <main id="top">
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="eyebrow"><span class="dot"></span>{site.eyebrow}</div>
+          <h1 id="hero-title">{site.headline}</h1>
+          <p class="intro">{site.intro}</p>
+          <div class="tags">{site.specialties.map(s => <span class="tag">{s}</span>)}</div>
+          <div class="actions">
+            <a class="button primary" href={site.github} target="_blank" rel="noopener noreferrer">↗ GitHub</a>
+            <a class="button" href="#research">↗ Read my work</a>
+          </div>
+        </section>
+        {site.show_projects && <section class="section" id="projects" aria-labelledby="projects-title">
+          <div class="section-heading"><div><div class="section-kicker">01 / SELECTED WORK</div><h2 id="projects-title">Projects</h2></div><a class="see-all" href={site.github} target="_blank" rel="noopener noreferrer">All repositories ↗</a></div>
+          <div class="project-grid">
+            {projects.map(p => <a class="project-card" href={p.url} target="_blank" rel="noopener noreferrer">
+              <div class="card-top"><span class="folder-icon" aria-hidden="true">⌑</span><span class="arrow" aria-hidden="true">↗</span></div>
+              <h3>{p.title}</h3><p>{p.description}</p>
+              <div class="project-tags">{(p.tags ?? []).map(t => <span>{t}</span>)}</div>
+            </a>)}
+          </div>
+        </section>}
+        {site.show_research && <section class="section" id="research" aria-labelledby="research-title">
+          <div class="section-heading"><div><div class="section-kicker">02 / FIELD NOTES</div><h2 id="research-title">Research & writing</h2></div><a class="see-all" href={site.medium} target="_blank" rel="noopener noreferrer">Medium ↗</a></div>
+          <div class="article-list">
+            {articles.map(a => <a class="article" href={a.url} target="_blank" rel="noopener noreferrer">
+              <div><span class="article-label">{a.label ?? 'Research'}</span><h3>{a.title}</h3><p>{a.description}</p></div><span class="arrow" aria-hidden="true">↗</span>
+            </a>)}
+          </div>
+        </section>}
+        {site.show_about && <section class="section about" id="about" aria-labelledby="about-title">
+          <div class="section-kicker">03 / THE PERSON BEHIND THE TERMINAL</div>
+          <h2 id="about-title">{site.about_title}</h2>
+          <p>{site.about}</p>
+          <div class="socials"><a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href={site.medium} target="_blank" rel="noopener noreferrer">Medium ↗</a><a href={site.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a></div>
+        </section>}
+      </main>
+      <footer><span>© {new Date().getFullYear()} Kelvin Santos</span><span>Built with Astro · Hosted on GitHub Pages</span></footer>
+    </div>
+  </body>
+</html>

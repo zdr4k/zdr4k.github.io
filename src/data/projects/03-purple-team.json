@@ -1,0 +1,11 @@
+{
+  "title": "Agentic Purple Team",
+  "description": "Exploring detection validation with AI and Atomic Red Team.",
+  "url": "https://medium.com/@kelvinzdk/agentic-goes-purple-ai-driven-detection-validation-with-the-atomic-red-team-mcp-underground-labs-d221c1c616d7",
+  "tags": [
+    "LangGraph",
+    "MITRE ATT&CK",
+    "Detection"
+  ],
+  "featured": true
+}
