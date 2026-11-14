@@ -1,8 +1,8 @@
 {
   "brand": "kelvin.dev",
   "eyebrow": "SECURITY ENGINEER · RESEARCHER · BUILDER",
-  "headline": "Building tools. Exploring threats. Engineering security.",
-  "intro": "I work at the intersection of security engineering, automation, and AI — turning complex security challenges into practical solutions.",
+  "headline": "Hi, I'm Kelvin Santos.",
+  "intro": "I'm a Security Engineer focused on detection engineering, incident response, and cloud security. I build security tools, explore AI-driven workflows, and write about what I learn.",
   "specialties": [
     "Detection Engineering",
     "Cloud Security",
@@ -16,19 +16,19 @@
   "show_about": true,
   "show_research": true,
   "show_projects": true,
-  "experience_intro": "I work across detection engineering, incident response, and cloud security—connecting investigations, automation, and practical defensive engineering.",
+  "experience_intro": "I work on practical security problems—from investigating incidents and improving detections to securing cloud environments and building tools that make security operations more effective.",
   "experience_items": [
     {
-      "title": "Security Engineering",
-      "description": "Detection engineering, incident response, threat hunting, and security operations."
+      "title": "Detection & Response",
+      "description": "Investigating threats, hunting across telemetry, and building detections that turn signals into actionable findings."
     },
     {
-      "title": "Cloud & Identity Security",
-      "description": "Hardening, monitoring, and access controls across cloud and identity environments."
+      "title": "Cloud & Identity",
+      "description": "Strengthening security posture, access controls, and visibility across cloud and identity environments."
     },
     {
-      "title": "Security Research & Automation",
-      "description": "Building experiments and tooling around security workflows, AI agents, and detection validation."
+      "title": "Research & Automation",
+      "description": "Experimenting with security tooling, AI agents, and repeatable workflows to validate and improve defenses."
     }
   ],
   "skills": [
