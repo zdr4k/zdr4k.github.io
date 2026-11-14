@@ -1,52 +1,66 @@
 {
   "brand": "kelvin.dev",
-  "eyebrow": "SECURITY ENGINEER · RESEARCHER · BUILDER",
+  "eyebrow": "SOC ENGINEER · DETECTION · AUTOMATION",
   "headline": "Hi, I'm Kelvin Santos.",
-  "intro": "I'm a Security Engineer focused on detection engineering, incident response, and cloud security. I build security tools, explore AI-driven workflows, and write about what I learn.",
+  "intro": "I engineer and improve security operations—building reliable detections, automating response workflows, and connecting tools, telemetry, and people to make a SOC more effective.",
   "specialties": [
+    "SOC Engineering",
     "Detection Engineering",
-    "Cloud Security",
-    "Agentic AI"
+    "SOAR & Automation",
+    "Incident Response"
   ],
-  "about_title": "A little about me",
-  "about": "I'm Kelvin, a Security Engineer focused on threat detection, incident response, and cloud security. I build tools, experiment with agentic workflows, and share what I learn.",
+  "about_title": "About me",
+  "about": "I'm a cybersecurity engineer focused on building and improving SOC capabilities. My work spans SIEM and EDR operations, detection development, incident response, cloud security, and automation. I enjoy turning manual investigations into repeatable workflows and translating security problems into practical engineering solutions.",
   "github": "https://github.com/zdr4k",
   "linkedin": "https://www.linkedin.com/in/kelvin-santos-b69b211a2/",
   "medium": "https://medium.com/@kelvinzdk",
   "show_about": true,
   "show_research": true,
   "show_projects": true,
-  "experience_intro": "I work on practical security problems—from investigating incidents and improving detections to securing cloud environments and building tools that make security operations more effective.",
+  "experience_intro": "My background spans security operations, engineering, and systems administration. I work across the detection lifecycle—from designing and tuning rules to investigating incidents, validating telemetry, and automating response.",
   "experience_items": [
     {
-      "title": "Detection & Response",
-      "description": "Investigating threats, hunting across telemetry, and building detections that turn signals into actionable findings."
+      "title": "SOC & Detection Engineering",
+      "description": "Develop, tune, and validate SIEM detections; improve alert quality, investigate complex events, and turn threat intelligence and telemetry into actionable detection logic."
     },
     {
-      "title": "Cloud & Identity",
-      "description": "Strengthening security posture, access controls, and visibility across cloud and identity environments."
+      "title": "Incident Response & DFIR",
+      "description": "Support incidents from triage and investigation through containment, forensic analysis, reporting, and post-incident improvements."
     },
     {
-      "title": "Research & Automation",
-      "description": "Experimenting with security tooling, AI agents, and repeatable workflows to validate and improve defenses."
+      "title": "Security Automation, SOAR & CI/CD",
+      "description": "Integrate security platforms, automate repetitive workflows and response actions, and apply version control, testing, and delivery pipelines to detection content."
+    },
+    {
+      "title": "Cloud, Identity & AI Security",
+      "description": "Work on cloud and identity security controls while exploring secure AI agents, MCP integrations, and agent-assisted SOC workflows."
     }
   ],
   "skills": [
     {
-      "title": "Detection Engineering",
-      "detail": "KQL · Microsoft Sentinel · MITRE ATT&CK · Threat Hunting"
+      "title": "SOC & Detection Engineering",
+      "detail": "Microsoft Sentinel · KQL · SIEM · EDR/XDR · MITRE ATT&CK"
+    },
+    {
+      "title": "Security Automation & SOAR",
+      "detail": "Python · PowerShell · API Integrations · Workflow Orchestration"
+    },
+    {
+      "title": "Security CI/CD",
+      "detail": "Detection as Code · GitHub Actions · Testing · Version Control"
     },
     {
       "title": "Incident Response & DFIR",
-      "detail": "Investigation · Triage · Digital Forensics · EDR"
+      "detail": "Triage · Threat Hunting · Malware Analysis · Forensic Artifacts"
     },
     {
       "title": "Cloud & Identity Security",
-      "detail": "Azure · Defender · Entra ID · CSPM"
+      "detail": "Azure · Microsoft Defender · Entra ID · CSPM"
     },
     {
-      "title": "Security Automation & AI",
-      "detail": "Python · PowerShell · LangGraph · MCP"
+      "title": "AI Security & Agentic Workflows",
+      "detail": "AI Agent Security · MCP · LangGraph · Prompt Injection Testing"
     }
-  ]
+  ],
+  "hero_role": "SOC Engineer"
 }

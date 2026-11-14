@@ -542,3 +542,15 @@ footer {
  .skill-row{padding:21px 0}
  #contact{padding-bottom:65px}
 }
+
+/* V2.2 — SOC engineering positioning */
+.hero-role{color:#f2f4f8;font-size:clamp(22px,3vw,30px);font-weight:650;letter-spacing:-.6px;margin:-8px 0 18px}
+.hero .intro{max-width:735px}
+.about-section{padding-top:30px}
+.about-section .section-lead{max-width:800px;font-size:18px;line-height:1.95}
+.about-links{display:flex;flex-wrap:wrap;gap:25px;margin:2px 0 10px}
+.about-links a{font-size:13px;color:#d6d8df}
+.about-links a:hover{color:white}
+#experience .editorial-row{padding:24px 0}
+#skills .skill-row{min-height:114px}
+@media(max-width:650px){.hero-role{font-size:23px;margin:-5px 0 13px}.about-section .section-lead{font-size:16px;line-height:1.85}#skills .skill-row{min-height:0}}
