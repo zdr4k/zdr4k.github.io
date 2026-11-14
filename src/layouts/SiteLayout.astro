@@ -28,6 +28,7 @@ const pathname = Astro.url.pathname;
           <a href="/" aria-current={pathname === '/' ? 'page' : undefined}>Home</a>
           <a href="/journal" aria-current={pathname.startsWith('/journal') ? 'page' : undefined}>Journal</a>
           <a href="/projects" aria-current={pathname.startsWith('/projects') ? 'page' : undefined}>Projects</a>
+          <a href="https://github.com/zdr4k/DFIR-Field-Notes" target="_blank" rel="noopener noreferrer">Notes ↗</a>
           <a href="/#contact">Contact</a>
         </nav>
       </header>
