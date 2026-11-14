@@ -1,5 +1,6 @@
 {
   "title": "Investigating an Unauthorized USB Drive — TabFlow Pro | LetsDefend Walkthrough | UnderTheBit #09",
+  "description": "Windows forensics tracing an unauthorized USB drive, browser extension and persistence artifacts.",
   "url": "https://medium.com/@kelvinzdk/tabflow-pro-letsdefend-walkthrough-underthebit-09-fda9fddcbf33",
   "label": "UnderTheBit"
 }
