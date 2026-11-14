@@ -1,0 +1,179 @@
+---
+import site from '../data/site.json';
+import '../styles/global.css';
+interface Props { title?: string; description?: string; }
+const { title = 'Kelvin Santos — Security Engineer', description = site.intro } = Astro.props;
+const pathname = Astro.url.pathname;
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#090a0c" />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <link rel="canonical" href={Astro.url.href} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <canvas id="lab-bg" aria-hidden="true"></canvas>
+    <div class="bg-vignette" aria-hidden="true"></div>
+    <div class="container">
+      <header class="header">
+        <a class="brand" href="/" aria-label="Back to home"><span class="logo-mark">⌁</span>{site.brand}</a>
+        <nav aria-label="Main navigation">
+          <a href="/" aria-current={pathname === '/' ? 'page' : undefined}>Home</a>
+          <a href="/journal" aria-current={pathname.startsWith('/journal') ? 'page' : undefined}>Journal</a>
+          <a href="/projects" aria-current={pathname.startsWith('/projects') ? 'page' : undefined}>Projects</a>
+          <a href="/#contact">Contact</a>
+        </nav>
+      </header>
+      <main><slot /></main>
+      <footer><span>© {new Date().getFullYear()} Kelvin Santos</span><span class="footer-links"><a href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a><a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a><a href={site.medium} target="_blank" rel="noopener noreferrer">Medium</a></span></footer>
+    </div>
+    <script>
+      (() => {
+        const canvas = document.getElementById('lab-bg');
+        if (!canvas) return;
+    
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+    
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    
+        let width = 0;
+        let height = 0;
+        let animationFrame = 0;
+        let particles = [];
+        let mouse = { x: -9999, y: -9999 };
+    
+        const PARTICLE_COUNT = reduceMotion ? 0 : isMobile ? 42 : 78;
+        const LINK_DISTANCE = isMobile ? 120 : 150;
+        const MOUSE_RADIUS = 140;
+    
+        function resize() {
+          width = window.innerWidth;
+          height = window.innerHeight;
+          canvas.width = width * Math.min(window.devicePixelRatio || 1, 2);
+          canvas.height = height * Math.min(window.devicePixelRatio || 1, 2);
+          canvas.style.width = width + 'px';
+          canvas.style.height = height + 'px';
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.scale(Math.min(window.devicePixelRatio || 1, 2), Math.min(window.devicePixelRatio || 1, 2));
+          createParticles();
+        }
+    
+        function random(min, max) {
+          return Math.random() * (max - min) + min;
+        }
+    
+        function createParticles() {
+          particles = [];
+          for (let i = 0; i < PARTICLE_COUNT; i++) {
+            particles.push({
+              x: random(0, width),
+              y: random(0, height),
+              vx: random(-0.18, 0.18),
+              vy: random(-0.18, 0.18),
+              r: random(0.7, 1.8)
+            });
+          }
+        }
+    
+        function drawBackground() {
+          const gradient = ctx.createLinearGradient(0, 0, width, height);
+          gradient.addColorStop(0, '#06070a');
+          gradient.addColorStop(0.5, '#090b12');
+          gradient.addColorStop(1, '#050608');
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, width, height);
+        }
+    
+        function updateParticles() {
+          for (const p of particles) {
+            p.x += p.vx;
+            p.y += p.vy;
+    
+            if (p.x <= 0 || p.x >= width) p.vx *= -1;
+            if (p.y <= 0 || p.y >= height) p.vy *= -1;
+    
+            const dx = mouse.x - p.x;
+            const dy = mouse.y - p.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+    
+            if (dist < MOUSE_RADIUS && dist > 0) {
+              const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS;
+              p.x -= (dx / dist) * force * 0.35;
+              p.y -= (dy / dist) * force * 0.35;
+            }
+          }
+        }
+    
+        function drawConnections() {
+          for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+              const a = particles[i];
+              const b = particles[j];
+              const dx = a.x - b.x;
+              const dy = a.y - b.y;
+              const dist = Math.sqrt(dx * dx + dy * dy);
+    
+              if (dist < LINK_DISTANCE) {
+                const opacity = (1 - dist / LINK_DISTANCE) * 0.16;
+                ctx.strokeStyle = `rgba(170, 190, 255, ${opacity})`;
+                ctx.lineWidth = 0.7;
+                ctx.beginPath();
+                ctx.moveTo(a.x, a.y);
+                ctx.lineTo(b.x, b.y);
+                ctx.stroke();
+              }
+            }
+          }
+        }
+    
+        function drawParticles() {
+          for (const p of particles) {
+            ctx.fillStyle = 'rgba(220, 228, 255, 0.38)';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+    
+        function draw() {
+          drawBackground();
+          updateParticles();
+          drawConnections();
+          drawParticles();
+          animationFrame = requestAnimationFrame(draw);
+        }
+    
+        function handleMouseMove(event) {
+          mouse.x = event.clientX;
+          mouse.y = event.clientY;
+        }
+    
+        function handleMouseLeave() {
+          mouse.x = -9999;
+          mouse.y = -9999;
+        }
+    
+        window.addEventListener('resize', resize);
+        window.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseleave', handleMouseLeave);
+    
+        resize();
+    
+        if (!reduceMotion) {
+          draw();
+        } else {
+          drawBackground();
+        }
+      })();
+    </script>
+  </body>
+</html>

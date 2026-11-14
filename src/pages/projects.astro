@@ -1,0 +1,17 @@
+---
+import Layout from '../layouts/SiteLayout.astro';
+type Project={title:string;description?:string;url:string;tags?:string[]};
+const files=import.meta.glob('../data/projects/*.json',{eager:true,import:'default'});
+const projects=(Object.entries(files) as [string,Project][]).sort(([a],[b])=>a.localeCompare(b)).map(([,item])=>item);
+---
+<Layout title="Projects — Kelvin Santos" description="Security engineering projects, research tools and automation.">
+  <section class="page-intro">
+    <div class="section-kicker">TOOLS / EXPERIMENTS / OPEN SOURCE</div>
+    <h1>Selected Work.</h1>
+    <p class="intro">Things I build and experiment with across security engineering, automation and AI.</p>
+  </section>
+  <section class="section" aria-labelledby="projects-list-title">
+    <div class="section-heading"><div><div class="section-kicker">THE LAB</div><h2 id="projects-list-title">Projects</h2></div></div>
+    <div class="project-grid">{projects.map(p=><a class="project-card" href={p.url} target="_blank" rel="noopener noreferrer"><div class="card-top"><span class="folder-icon" aria-hidden="true">⌑</span><span class="arrow" aria-hidden="true">↗</span></div><h3>{p.title}</h3><p>{p.description}</p><div class="project-tags">{(p.tags??[]).map(t=><span>{t}</span>)}</div></a>)}</div>
+  </section>
+</Layout>

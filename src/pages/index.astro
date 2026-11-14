@@ -1,221 +1,50 @@
-\
 ---
+import Layout from '../layouts/SiteLayout.astro';
 import site from '../data/site.json';
-import '../styles/global.css';
-
 const projectFiles = import.meta.glob('../data/projects/*.json', { eager: true, import: 'default' });
 const articleFiles = import.meta.glob('../data/articles/*.json', { eager: true, import: 'default' });
-type Item = { title: string; description: string; url: string; tags?: string[]; featured?: boolean; label?: string };
-const projects = (Object.entries(projectFiles) as [string, Item][])
-  .sort(([a],[b]) => a.localeCompare(b))
-  .map(([,value]) => value)
-  .filter(item => item.featured);
-const articles = (Object.entries(articleFiles) as [string, Item][])
-  .sort(([a],[b]) => a.localeCompare(b))
-  .map(([,value]) => value);
+type Project = {title:string;description?:string;url:string;tags?:string[];featured?:boolean};
+type Article = {title:string;description?:string;url:string;label?:string};
+const projects=(Object.entries(projectFiles) as [string,Project][]).sort(([a],[b])=>a.localeCompare(b)).map(([,item])=>item).filter(p=>p.featured).slice(0,3);
+const articles=(Object.entries(articleFiles) as [string,Article][]).sort(([a],[b])=>a.localeCompare(b)).map(([,item])=>item).filter(a=>!a.title.toLowerCase().startsWith('more writing')).slice(0,3);
 ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#090a0c" />
-    <meta name="description" content={site.intro} />
-    <meta property="og:title" content="Kelvin Santos — Security Engineer" />
-    <meta property="og:description" content={site.intro} />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>Kelvin Santos — Security Engineer</title>
-  </head>
-  <body>
-    <canvas id="lab-bg" aria-hidden="true"></canvas>
-    <div class="bg-vignette" aria-hidden="true"></div>
-    <div class="container">
-      <header class="header">
-        <a class="brand" href="#top" aria-label="Go to top"><span class="logo-mark">⌁</span>{site.brand}</a>
-        <nav aria-label="Main navigation">
-          {site.show_projects && <a href="#projects">Projects</a>}
-          {site.show_research && <a href="#research">Research</a>}
-          {site.show_about && <a href="#about">About</a>}
-        </nav>
-      </header>
-      <main id="top">
-        <section class="hero" aria-labelledby="hero-title">
-          <div class="eyebrow"><span class="dot"></span>{site.eyebrow}</div>
-          <h1 id="hero-title">{site.headline}</h1>
-          <p class="intro">{site.intro}</p>
-          <div class="tags">{site.specialties.map(s => <span class="tag">{s}</span>)}</div>
-          <div class="actions">
-            <a class="button primary" href={site.github} target="_blank" rel="noopener noreferrer">↗ GitHub</a>
-            <a class="button" href="#research">↗ Read my work</a>
-          </div>
-        </section>
-        {site.show_projects && <section class="section" id="projects" aria-labelledby="projects-title">
-          <div class="section-heading"><div><div class="section-kicker">01 / SELECTED WORK</div><h2 id="projects-title">Projects</h2></div><a class="see-all" href={site.github} target="_blank" rel="noopener noreferrer">All repositories ↗</a></div>
-          <div class="project-grid">
-            {projects.map(p => <a class="project-card" href={p.url} target="_blank" rel="noopener noreferrer">
-              <div class="card-top"><span class="folder-icon" aria-hidden="true">⌑</span><span class="arrow" aria-hidden="true">↗</span></div>
-              <h3>{p.title}</h3><p>{p.description}</p>
-              <div class="project-tags">{(p.tags ?? []).map(t => <span>{t}</span>)}</div>
-            </a>)}
-          </div>
-        </section>}
-        {site.show_research && <section class="section" id="research" aria-labelledby="research-title">
-          <div class="section-heading"><div><div class="section-kicker">02 / FIELD NOTES</div><h2 id="research-title">Research & writing</h2></div><a class="see-all" href={site.medium} target="_blank" rel="noopener noreferrer">Medium ↗</a></div>
-          <div class="article-list">
-            {articles.map(a => <a class="article" href={a.url} target="_blank" rel="noopener noreferrer">
-              <div><span class="article-label">{a.label ?? 'Research'}</span><h3>{a.title}</h3><p>{a.description}</p></div><span class="arrow" aria-hidden="true">↗</span>
-            </a>)}
-          </div>
-        </section>}
-        {site.show_about && <section class="section about" id="about" aria-labelledby="about-title">
-          <div class="section-kicker">03 / THE PERSON BEHIND THE TERMINAL</div>
-          <h2 id="about-title">{site.about_title}</h2>
-          <p>{site.about}</p>
-          <div class="socials"><a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href={site.medium} target="_blank" rel="noopener noreferrer">Medium ↗</a><a href={site.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a></div>
-        </section>}
-      </main>
-      <footer><span>© {new Date().getFullYear()} Kelvin Santos</span><span>Built with Astro · Hosted on GitHub Pages</span></footer>
+<Layout>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="eyebrow"><span class="dot"></span>{site.eyebrow}</div>
+    <h1 id="hero-title">{site.headline}</h1>
+    <p class="intro">{site.intro}</p>
+    <div class="actions">
+      <a class="button primary" href="#experience">About me ↘</a>
+      <a class="button" href="/journal">Explore research ↗</a>
     </div>
-    <script>
-      (() => {
-        const canvas = document.getElementById('lab-bg');
-        if (!canvas) return;
-    
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
-    
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        const isMobile = window.matchMedia('(max-width: 768px)').matches;
-    
-        let width = 0;
-        let height = 0;
-        let animationFrame = 0;
-        let particles = [];
-        let mouse = { x: -9999, y: -9999 };
-    
-        const PARTICLE_COUNT = reduceMotion ? 0 : isMobile ? 42 : 78;
-        const LINK_DISTANCE = isMobile ? 120 : 150;
-        const MOUSE_RADIUS = 140;
-    
-        function resize() {
-          width = window.innerWidth;
-          height = window.innerHeight;
-          canvas.width = width * Math.min(window.devicePixelRatio || 1, 2);
-          canvas.height = height * Math.min(window.devicePixelRatio || 1, 2);
-          canvas.style.width = width + 'px';
-          canvas.style.height = height + 'px';
-          ctx.setTransform(1, 0, 0, 1, 0, 0);
-          ctx.scale(Math.min(window.devicePixelRatio || 1, 2), Math.min(window.devicePixelRatio || 1, 2));
-          createParticles();
-        }
-    
-        function random(min, max) {
-          return Math.random() * (max - min) + min;
-        }
-    
-        function createParticles() {
-          particles = [];
-          for (let i = 0; i < PARTICLE_COUNT; i++) {
-            particles.push({
-              x: random(0, width),
-              y: random(0, height),
-              vx: random(-0.18, 0.18),
-              vy: random(-0.18, 0.18),
-              r: random(0.7, 1.8)
-            });
-          }
-        }
-    
-        function drawBackground() {
-          const gradient = ctx.createLinearGradient(0, 0, width, height);
-          gradient.addColorStop(0, '#06070a');
-          gradient.addColorStop(0.5, '#090b12');
-          gradient.addColorStop(1, '#050608');
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, width, height);
-        }
-    
-        function updateParticles() {
-          for (const p of particles) {
-            p.x += p.vx;
-            p.y += p.vy;
-    
-            if (p.x <= 0 || p.x >= width) p.vx *= -1;
-            if (p.y <= 0 || p.y >= height) p.vy *= -1;
-    
-            const dx = mouse.x - p.x;
-            const dy = mouse.y - p.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-    
-            if (dist < MOUSE_RADIUS && dist > 0) {
-              const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS;
-              p.x -= (dx / dist) * force * 0.35;
-              p.y -= (dy / dist) * force * 0.35;
-            }
-          }
-        }
-    
-        function drawConnections() {
-          for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-              const a = particles[i];
-              const b = particles[j];
-              const dx = a.x - b.x;
-              const dy = a.y - b.y;
-              const dist = Math.sqrt(dx * dx + dy * dy);
-    
-              if (dist < LINK_DISTANCE) {
-                const opacity = (1 - dist / LINK_DISTANCE) * 0.16;
-                ctx.strokeStyle = `rgba(170, 190, 255, ${opacity})`;
-                ctx.lineWidth = 0.7;
-                ctx.beginPath();
-                ctx.moveTo(a.x, a.y);
-                ctx.lineTo(b.x, b.y);
-                ctx.stroke();
-              }
-            }
-          }
-        }
-    
-        function drawParticles() {
-          for (const p of particles) {
-            ctx.fillStyle = 'rgba(220, 228, 255, 0.38)';
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-    
-        function draw() {
-          drawBackground();
-          updateParticles();
-          drawConnections();
-          drawParticles();
-          animationFrame = requestAnimationFrame(draw);
-        }
-    
-        function handleMouseMove(event) {
-          mouse.x = event.clientX;
-          mouse.y = event.clientY;
-        }
-    
-        function handleMouseLeave() {
-          mouse.x = -9999;
-          mouse.y = -9999;
-        }
-    
-        window.addEventListener('resize', resize);
-        window.addEventListener('mousemove', handleMouseMove);
-        window.addEventListener('mouseleave', handleMouseLeave);
-    
-        resize();
-    
-        if (!reduceMotion) {
-          draw();
-        } else {
-          drawBackground();
-        }
-      })();
-    </script>
-  </body>
-</html>
+  </section>
+  {site.show_about && <section class="section editorial-section" id="experience" aria-labelledby="experience-title">
+    <div class="section-heading"><div><div class="section-kicker">01 / BACKGROUND</div><h2 id="experience-title">Experience</h2></div></div>
+    <p class="section-lead">{site.experience_intro}</p>
+    <div class="editorial-list">
+      {site.experience_items.map((item, i)=><div class="editorial-row"><span class="row-index">{String(i+1).padStart(2,'0')}</span><div><h3>{item.title}</h3><p>{item.description}</p></div></div>)}
+    </div>
+  </section>}
+  <section class="section editorial-section" id="skills" aria-labelledby="skills-title">
+    <div class="section-heading"><div><div class="section-kicker">02 / EXPERTISE</div><h2 id="skills-title">Skills & Expertise</h2></div></div>
+    <div class="editorial-list">
+      {site.skills.map((item, i)=><div class="editorial-row"><span class="row-index">{String(i+1).padStart(2,'0')}</span><div><h3>{item.title}</h3><p>{item.detail}</p></div></div>)}
+    </div>
+  </section>
+  {site.show_projects && <section class="section" id="projects" aria-labelledby="projects-title">
+    <div class="section-heading"><div><div class="section-kicker">03 / SELECTED WORK</div><h2 id="projects-title">Featured Projects</h2></div><a class="see-all" href="/projects">All projects ↗</a></div>
+    <div class="project-grid compact-grid">
+      {projects.map(p=><a class="project-card" href={p.url} target="_blank" rel="noopener noreferrer"><div class="card-top"><span class="folder-icon" aria-hidden="true">⌑</span><span class="arrow" aria-hidden="true">↗</span></div><h3>{p.title}</h3><p>{p.description}</p><div class="project-tags">{(p.tags??[]).map(t=><span>{t}</span>)}</div></a>)}
+    </div>
+  </section>}
+  {site.show_research && <section class="section" id="research" aria-labelledby="research-title">
+    <div class="section-heading"><div><div class="section-kicker">04 / FIELD NOTES</div><h2 id="research-title">Latest Research</h2></div><a class="see-all" href="/journal">Security Research Journal ↗</a></div>
+    <div class="article-list">{articles.map(a=><a class="article" href={a.url} target="_blank" rel="noopener noreferrer"><div><span class="article-label">{a.label??'Research'}</span><h3>{a.title}</h3>{a.description&&<p>{a.description}</p>}</div><span class="arrow" aria-hidden="true">↗</span></a>)}</div>
+  </section>}
+  <section class="section about" id="contact" aria-labelledby="contact-title">
+    <div class="section-kicker">05 / CONTACT</div>
+    <h2 id="contact-title">Let's connect.</h2>
+    <p>{site.about}</p>
+    <div class="socials"><a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href={site.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a><a href={site.medium} target="_blank" rel="noopener noreferrer">Medium ↗</a></div>
+  </section>
+</Layout>

@@ -1,8 +1,8 @@
 {
   "brand": "kelvin.dev",
-  "eyebrow": "SECURITY ENGINEER \u00b7 RESEARCHER \u00b7 BUILDER",
+  "eyebrow": "SECURITY ENGINEER · RESEARCHER · BUILDER",
   "headline": "Building tools. Exploring threats. Engineering security.",
-  "intro": "I work at the intersection of security engineering, automation, and AI \u2014 turning complex security challenges into practical solutions.",
+  "intro": "I work at the intersection of security engineering, automation, and AI — turning complex security challenges into practical solutions.",
   "specialties": [
     "Detection Engineering",
     "Cloud Security",
@@ -15,5 +15,38 @@
   "medium": "https://medium.com/@kelvinzdk",
   "show_about": true,
   "show_research": true,
-  "show_projects": true
+  "show_projects": true,
+  "experience_intro": "I work across detection engineering, incident response, and cloud security—connecting investigations, automation, and practical defensive engineering.",
+  "experience_items": [
+    {
+      "title": "Security Engineering",
+      "description": "Detection engineering, incident response, threat hunting, and security operations."
+    },
+    {
+      "title": "Cloud & Identity Security",
+      "description": "Hardening, monitoring, and access controls across cloud and identity environments."
+    },
+    {
+      "title": "Security Research & Automation",
+      "description": "Building experiments and tooling around security workflows, AI agents, and detection validation."
+    }
+  ],
+  "skills": [
+    {
+      "title": "Detection Engineering",
+      "detail": "KQL · Microsoft Sentinel · MITRE ATT&CK · Threat Hunting"
+    },
+    {
+      "title": "Incident Response & DFIR",
+      "detail": "Investigation · Triage · Digital Forensics · EDR"
+    },
+    {
+      "title": "Cloud & Identity Security",
+      "detail": "Azure · Defender · Entra ID · CSPM"
+    },
+    {
+      "title": "Security Automation & AI",
+      "detail": "Python · PowerShell · LangGraph · MCP"
+    }
+  ]
 }

@@ -19,6 +19,21 @@ content:
       - { name: show_projects, label: Show projects, type: boolean }
       - { name: show_research, label: Show research, type: boolean }
       - { name: show_about, label: Show about, type: boolean }
+      - { name: experience_intro, label: Experience introduction, type: text }
+      - name: experience_items
+        label: Experience areas
+        type: object
+        list: true
+        fields:
+          - { name: title, label: Title, type: string }
+          - { name: description, label: Description, type: text }
+      - name: skills
+        label: Skills and expertise
+        type: object
+        list: true
+        fields:
+          - { name: title, label: Area, type: string }
+          - { name: detail, label: Technologies, type: string }
       - { name: about_title, label: About heading, type: string }
       - { name: about, label: About text, type: text }
       - { name: github, label: GitHub URL, type: string }
