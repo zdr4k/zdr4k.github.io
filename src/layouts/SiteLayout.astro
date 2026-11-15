@@ -56,8 +56,8 @@ const pathname = Astro.url.pathname;
         let threatScene = null;
         let nextSceneAt = performance.now() + 900;
         const SCENE_DURATION = 5800;
-        const SCENE_PAUSE_MIN = 1300;
-        const SCENE_PAUSE_MAX = 2500;
+        const SCENE_PAUSE_MIN = 1600;
+        const SCENE_PAUSE_MAX = 3800;
     
         const PARTICLE_COUNT = reduceMotion ? 0 : isMobile ? 54 : 102;
         const LINK_DISTANCE = isMobile ? 120 : 150;
@@ -233,8 +233,13 @@ const pathname = Astro.url.pathname;
             );
             if (!defense) continue;
 
+            // Vary strength and tempo once per event, not per animation frame.
+            // This keeps each individual scene smooth but less repetitive.
+            const intensity = .68 + Math.random() * .38;
+            const tempo = .91 + Math.random() * .16;
             threatScene = { red: attack, blue: defense, hub, start: now,
-              threatType: Math.random() < .30 ? 'purple' : 'red' };
+              threatType: Math.random() < .30 ? 'purple' : 'red',
+              intensity, tempo, duration: SCENE_DURATION * tempo };
             return;
           }
           nextSceneAt = now + 750;
@@ -249,15 +254,16 @@ const pathname = Astro.url.pathname;
 
           const scene = threatScene;
           const age = now - scene.start;
-          if (age >= SCENE_DURATION) {
+          if (age >= scene.duration) {
             threatScene = null;
             nextSceneAt = now + SCENE_PAUSE_MIN +
               Math.random() * (SCENE_PAUSE_MAX - SCENE_PAUSE_MIN);
             return;
           }
 
-          const fadeIn = smoothstep(age / 650);
-          const fadeOut = 1 - smoothstep((age - 5000) / 750);
+          const sceneAge = age / scene.tempo;
+          const fadeIn = smoothstep(sceneAge / 650);
+          const fadeOut = 1 - smoothstep((sceneAge - 5000) / 750);
           const fade = fadeIn * fadeOut;
 
           // Draw a continuous route from its origin toward the SAME hub.
@@ -302,19 +308,19 @@ const pathname = Astro.url.pathname;
           }
 
           // Intrusion -> detection -> blue response -> contained -> calm.
-          const attackProgress = smoothstep(age / 2600);
-          const defenseProgress = smoothstep((age - 2200) / 2450);
-          const containment = smoothstep((age - 4750) / 650);
+          const attackProgress = smoothstep(sceneAge / 2600);
+          const defenseProgress = smoothstep((sceneAge - 2200) / 2450);
+          const containment = smoothstep((sceneAge - 4750) / 650);
           const threatColor = scene.threatType === 'purple'
             ? '168, 102, 255'
             : '245, 92, 118';
           const threatOpacity = scene.threatType === 'purple' ? .54 : .56;
           drawRoute(scene.red, attackProgress, threatColor,
-            threatOpacity * (1 - containment * .88));
-          drawRoute(scene.blue, defenseProgress, '84, 163, 255', .58);
+            threatOpacity * scene.intensity * (1 - containment * .88));
+          drawRoute(scene.blue, defenseProgress, '84, 163, 255', .58 * scene.intensity);
 
-          const ring = smoothstep((age - 2380) / 350) *
-            (1 - smoothstep((age - 3350) / 700)) * fade;
+          const ring = smoothstep((sceneAge - 2380) / 350) *
+            (1 - smoothstep((sceneAge - 3350) / 700)) * fade;
           if (ring > .003) {
             const p = particles[scene.hub];
             ctx.beginPath();
