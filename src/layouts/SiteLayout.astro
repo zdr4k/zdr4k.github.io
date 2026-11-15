@@ -51,8 +51,14 @@ const pathname = Astro.url.pathname;
         let animationFrame = 0;
         let particles = [];
         let mouse = { x: -9999, y: -9999 };
+        // Keep colored path selections stable, then crossfade to new routes.
+        let activeTraffic = [];
+        let fadingTraffic = [];
+        let trafficSelectedAt = -Infinity;
+        const TRAFFIC_INTERVAL = 8000;
+        const TRAFFIC_CROSSFADE = 2200;
     
-        const PARTICLE_COUNT = reduceMotion ? 0 : isMobile ? 42 : 78;
+        const PARTICLE_COUNT = reduceMotion ? 0 : isMobile ? 50 : 96;
         const LINK_DISTANCE = isMobile ? 120 : 150;
         const MOUSE_RADIUS = 140;
     
@@ -66,6 +72,9 @@ const pathname = Astro.url.pathname;
           ctx.setTransform(1, 0, 0, 1, 0, 0);
           ctx.scale(Math.min(window.devicePixelRatio || 1, 2), Math.min(window.devicePixelRatio || 1, 2));
           createParticles();
+          activeTraffic=[];
+          fadingTraffic=[];
+          trafficSelectedAt=-Infinity;
         }
     
         function random(min, max) {
@@ -137,61 +146,92 @@ const pathname = Astro.url.pathname;
           }
         }
 
-        // Sparse directional attack/defense "paths" along real mesh edges.
-        // No extra particles, destinations, glows, or new movement system.
-        function drawTrafficPaths() {
-          const textAreas = Array.from(document.querySelectorAll(
+        // A few connected attack/defense paths inside the ORIGINAL mesh.
+        // Paths are held for 8 seconds and crossfade over 2.2 seconds,
+        // instead of choosing new particles every animation frame.
+        function selectTrafficPaths() {
+          const blockers = Array.from(document.querySelectorAll(
             'h1, .intro, .hero-role, .section-heading, .section-lead, .capability, .editorial-row, .project-card, .article, .socials'
           )).map(el => el.getBoundingClientRect()).filter(r =>
             r.bottom > 0 && r.top < height && r.right > 0 && r.left < width
           );
-          const underText = (x, y) => textAreas.some(r =>
-            x > r.left - 18 && x < r.right + 18 &&
-            y > r.top - 16 && y < r.bottom + 16
+          const blocked = (x, y) => blockers.some(r =>
+            x > r.left - 22 && x < r.right + 22 &&
+            y > r.top - 20 && y < r.bottom + 20
           );
-          const network = particles.map((a, i) => particles
-            .map((b, j) => ({
-              j, distance: Math.hypot(a.x - b.x, a.y - b.y)
-            }))
-            .filter(e => e.j !== i && e.distance < LINK_DISTANCE)
-            .sort((a, b) => a.distance - b.distance));
+          // Leave room for moving nodes so a path doesn't abruptly disappear.
+          const routeLimit = LINK_DISTANCE * 0.82;
+          const neighbors = particles.map((a, i) => particles
+            .map((b, j) => ({j, d: Math.hypot(a.x-b.x, a.y-b.y)}))
+            .filter(e => e.j !== i && e.d < routeLimit)
+            .sort((a, b) => a.d - b.d));
+
           const zones = [
-            { x: 0.10, y: 0.27, rgb: '70, 150, 245' },
-            { x: 0.88, y: 0.24, rgb: '235, 85, 110' },
-            { x: 0.12, y: 0.77, rgb: '235, 85, 110' },
-            { x: 0.86, y: 0.78, rgb: '70, 150, 245' },
+            {x:.10,y:.25,rgb:'70, 150, 245'},
+            {x:.90,y:.25,rgb:'235, 85, 110'},
+            {x:.12,y:.80,rgb:'235, 85, 110'},
+            {x:.87,y:.79,rgb:'70, 150, 245'}
           ];
-          for (const zone of zones) {
-            // Prefer local groups outside readable content.
-            const candidates = particles.map((p, i) => ({
-              i, score: Math.hypot(p.x - width * zone.x, p.y - height * zone.y)
-            })).filter(({i}) => network[i].length >= 2 && !underText(particles[i].x, particles[i].y))
-              .sort((a, b) => a.score - b.score);
-            if (!candidates.length) continue;
-            let from = candidates[0].i;
-            let previous = -1;
-            // Two or three connected segments form a path, not random color noise.
-            for (let hop = 0; hop < 3; hop++) {
-              const options = network[from].filter(({j}) =>
-                j !== previous && !underText(particles[j].x, particles[j].y) &&
-                !underText((particles[from].x + particles[j].x) / 2,
-                           (particles[from].y + particles[j].y) / 2)
-              );
-              if (!options.length) break;
-              const to = options[Math.min(hop % 2, options.length - 1)].j;
-              const a = particles[from], b = particles[to];
-              const distance = Math.hypot(a.x - b.x, a.y - b.y);
-              const strength = 1 - distance / LINK_DISTANCE;
-              ctx.strokeStyle = `rgba(${zone.rgb}, ${0.08 + strength * 0.17})`;
-              ctx.lineWidth = 0.85;
-              ctx.beginPath();
-              ctx.moveTo(a.x, a.y);
-              ctx.lineTo(b.x, b.y);
-              ctx.stroke();
-              previous = from;
-              from = to;
+          const picked = [];
+          for(const zone of zones) {
+            const starts = particles.map((p,i) => ({
+              i, score:Math.hypot(p.x-width*zone.x,p.y-height*zone.y)
+            })).filter(c => neighbors[c.i].length > 0 &&
+              !blocked(particles[c.i].x,particles[c.i].y)
+            ).sort((a,b)=>a.score-b.score);
+
+            let path = [];
+            for(const start of starts.slice(0,8)) {
+              let current=start.i, previous=-1;
+              const edges=[];
+              for(let hop=0;hop<3;hop++) {
+                const choices=neighbors[current].filter(e =>
+                  e.j!==previous &&
+                  !blocked(particles[e.j].x,particles[e.j].y) &&
+                  !blocked((particles[current].x+particles[e.j].x)/2,
+                           (particles[current].y+particles[e.j].y)/2)
+                );
+                if(!choices.length)break;
+                const next=choices[Math.min(hop,choices.length-1)].j;
+                edges.push({a:current,b:next,rgb:zone.rgb});
+                previous=current;
+                current=next;
+              }
+              if(edges.length>path.length)path=edges;
+              if(path.length===3)break;
             }
+            picked.push(...path);
           }
+          return picked;
+        }
+
+        function drawTrafficPaths(now) {
+          if(now-trafficSelectedAt >= TRAFFIC_INTERVAL) {
+            fadingTraffic=activeTraffic;
+            activeTraffic=selectTrafficPaths();
+            trafficSelectedAt=now;
+          }
+          const blend=Math.min(1,Math.max(0,(now-trafficSelectedAt)/TRAFFIC_CROSSFADE));
+          const drawSet=(set,weight)=>{
+            if(weight<=0)return;
+            for(const edge of set) {
+              const a=particles[edge.a], b=particles[edge.b];
+              const d=Math.hypot(a.x-b.x,a.y-b.y);
+              // Fade approaching the connection limit; never snap off.
+              const proximity=Math.min(1,Math.max(0,(LINK_DISTANCE-d)/(LINK_DISTANCE*.22)));
+              const opacity=(.085+.15*proximity)*weight*proximity;
+              if(opacity<.003)continue;
+              ctx.strokeStyle=`rgba(${edge.rgb}, ${opacity})`;
+              ctx.lineWidth=.85;
+              ctx.beginPath();
+              ctx.moveTo(a.x,a.y);
+              ctx.lineTo(b.x,b.y);
+              ctx.stroke();
+            }
+          };
+          drawSet(fadingTraffic,1-blend);
+          drawSet(activeTraffic,blend);
+          if(blend===1)fadingTraffic=[];
         }
     
         function drawParticles() {
@@ -207,7 +247,7 @@ const pathname = Astro.url.pathname;
           drawBackground();
           updateParticles();
           drawConnections();
-          drawTrafficPaths();
+          drawTrafficPaths(performance.now());
           drawParticles();
           animationFrame = requestAnimationFrame(draw);
         }
