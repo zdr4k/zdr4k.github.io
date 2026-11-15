@@ -55,7 +55,7 @@ const pathname = Astro.url.pathname;
         // The mesh itself stays the original softly animated particle network.
         let threatScene = null;
         let nextSceneAt = performance.now() + 900;
-        const SCENE_DURATION = 6500;
+        const SCENE_DURATION = 5800;
         const SCENE_PAUSE_MIN = 1300;
         const SCENE_PAUSE_MAX = 2500;
     
@@ -257,7 +257,7 @@ const pathname = Astro.url.pathname;
           }
 
           const fadeIn = smoothstep(age / 650);
-          const fadeOut = 1 - smoothstep((age - 5700) / 750);
+          const fadeOut = 1 - smoothstep((age - 5000) / 750);
           const fade = fadeIn * fadeOut;
 
           // Draw a continuous route from its origin toward the SAME hub.
@@ -304,7 +304,7 @@ const pathname = Astro.url.pathname;
           // Intrusion -> detection -> blue response -> contained -> calm.
           const attackProgress = smoothstep(age / 2600);
           const defenseProgress = smoothstep((age - 2200) / 2450);
-          const containment = smoothstep((age - 4750) / 850);
+          const containment = smoothstep((age - 4750) / 650);
           const threatColor = scene.threatType === 'purple'
             ? '168, 102, 255'
             : '245, 92, 118';
