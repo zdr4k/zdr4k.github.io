@@ -63,8 +63,8 @@ const pathname = Astro.url.pathname;
         // At 90% browser zoom the viewport covers roughly 23% more CSS area
         // than at 100%, so it also receives ~23% more neutral particles.
         // Keep mobile unchanged and cap unusually large desktop displays.
-        const desktopParticleCount = () => Math.max(110, Math.min(240,
-          Math.round(146 * (width * height) / (1800 * 900))));
+        const desktopParticleCount = () => Math.max(125, Math.min(275,
+          Math.round(170 * (width * height) / (1800 * 900))));
         const LINK_DISTANCE = isMobile ? 126 : 158;
         const MOUSE_RADIUS = 140;
     
@@ -88,7 +88,7 @@ const pathname = Astro.url.pathname;
     
         function createParticles() {
           particles = [];
-          const count = reduceMotion ? 0 : isMobile ? 66 : desktopParticleCount();
+          const count = reduceMotion ? 0 : isMobile ? 74 : desktopParticleCount();
           for (let i = 0; i < count; i++) {
             particles.push({
               x: random(0, width),
