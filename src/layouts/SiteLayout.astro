@@ -59,8 +59,8 @@ const pathname = Astro.url.pathname;
         const SCENE_PAUSE_MIN = 1600;
         const SCENE_PAUSE_MAX = 3800;
     
-        const PARTICLE_COUNT = reduceMotion ? 0 : isMobile ? 60 : 118;
-        const LINK_DISTANCE = isMobile ? 120 : 150;
+        const PARTICLE_COUNT = reduceMotion ? 0 : isMobile ? 66 : 132;
+        const LINK_DISTANCE = isMobile ? 126 : 158;
         const MOUSE_RADIUS = 140;
     
         function resize() {
@@ -134,7 +134,7 @@ const pathname = Astro.url.pathname;
               const dist = Math.sqrt(dx * dx + dy * dy);
     
               if (dist < LINK_DISTANCE) {
-                const opacity = (1 - dist / LINK_DISTANCE) * 0.16;
+                const opacity = (1 - dist / LINK_DISTANCE) * 0.18;
                 ctx.strokeStyle = `rgba(170, 190, 255, ${opacity})`;
                 ctx.lineWidth = 0.7;
                 ctx.beginPath();
