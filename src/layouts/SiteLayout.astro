@@ -125,7 +125,13 @@ const pathname = Astro.url.pathname;
     
               if (dist < LINK_DISTANCE) {
                 const opacity = (1 - dist / LINK_DISTANCE) * 0.16;
-                ctx.strokeStyle = `rgba(170, 190, 255, ${opacity})`;
+                const lineSeed = ((i + 1) * 37 + (j + 1) * 61 + i * j * 13) % 100;
+                const rgb = lineSeed < 5
+                  ? '235, 85, 110'    // red: 5%
+                  : lineSeed < 15
+                    ? '70, 150, 245'  // blue: 10%
+                    : '170, 190, 255'; // original: 85%
+                ctx.strokeStyle = `rgba(${rgb}, ${opacity})`;
                 ctx.lineWidth = 0.7;
                 ctx.beginPath();
                 ctx.moveTo(a.x, a.y);
