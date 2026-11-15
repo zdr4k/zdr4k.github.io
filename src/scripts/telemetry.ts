@@ -1,49 +1,110 @@
-// Decorative telemetry paths: an illustrative animation, not actual threat activity.
-const canvas=document.getElementById('telemetry-bg') as HTMLCanvasElement | null;
-if(canvas){
-  const ctx=canvas.getContext('2d');
-  if(ctx){
-    const mq=window.matchMedia('(prefers-reduced-motion: reduce)');
-    type Route={x1:number;y1:number;x2:number;y2:number;phase:number;speed:number;alpha:number};
-    let routes:Route[]=[];
-    let w=0,h=0,dpr=1,raf=0;
-    let isVisible=true;
-    const build=()=>{
-      w=window.innerWidth;h=window.innerHeight;
-      dpr=Math.min(window.devicePixelRatio||1,2);
-      canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);
-      canvas.style.width=w+'px';canvas.style.height=h+'px';
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-      const cols=w<700?5:9;
-      const rows=h<550?4:7;
-      routes=[];
-      for(let i=0;i<cols;i++)for(let j=0;j<rows;j++){
-        const x1=(i+.2)/cols*w;
-        const y1=(j+.3)/rows*h;
-        if((i+j)%3===0){
-          routes.push({x1,y1,x2:x1+(w/cols)*(1.1+((i+j)%2)*.45),y2:y1+(h/rows)*((i%2)?-.5:.55),phase:((i*11+j*7)%23)/23,speed:.00007+((i+j)%4)*.000025,alpha:.05+((i+j)%3)*.018});
-        }
-      }
-      render(0,true);
+/**
+ * Abstract defensive-telemetry artwork. Curving blue and red streams
+ * are decorative, not live attacks or real security events.
+ */
+const canvas = document.getElementById('telemetry-bg') as HTMLCanvasElement | null;
+
+if (canvas) {
+  const context = canvas.getContext('2d');
+  if (context) {
+    type Stream = {
+      startX: number; startY: number; endX: number; endY: number;
+      controlX: number; controlY: number;
+      tint: 'blue' | 'red'; phase: number; duration: number; opacity: number;
     };
-    const render=(time:number,staticFrame=false)=>{
-      if(!ctx)return;
-      ctx.clearRect(0,0,w,h);
-      for(const line of routes){
-        ctx.strokeStyle='rgba(113,169,182,'+line.alpha+')';
-        ctx.lineWidth=.75;
-        ctx.beginPath();ctx.moveTo(line.x1,line.y1);ctx.lineTo(line.x2,line.y2);ctx.stroke();
-        const t=(line.phase+time*line.speed)%1;
-        const x=line.x1+(line.x2-line.x1)*t,y=line.y1+(line.y2-line.y1)*t;
-        ctx.beginPath();ctx.fillStyle='rgba(139,204,189,.28)';ctx.arc(x,y,1.6,0,Math.PI*2);ctx.fill();
-      }
-      if(!staticFrame&&!mq.matches&&isVisible)raf=requestAnimationFrame(t=>render(t));
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let streams: Stream[] = [];
+    let width = 0;
+    let height = 0;
+    let frame = 0;
+    let visible = !document.hidden;
+    let startedAt = performance.now();
+
+    const pointOnCurve = (stream: Stream, t: number) => {
+      const a = (1 - t) * (1 - t);
+      const b = 2 * (1 - t) * t;
+      const c = t * t;
+      return {
+        x: a * stream.startX + b * stream.controlX + c * stream.endX,
+        y: a * stream.startY + b * stream.controlY + c * stream.endY,
+      };
     };
-    const start=()=>{cancelAnimationFrame(raf);render(0,mq.matches||!isVisible);};
-    const handleVisibility=()=>{isVisible=!document.hidden;start();};
-    window.addEventListener('resize',build,{passive:true});
-    document.addEventListener('visibilitychange',handleVisibility);
-    mq.addEventListener('change',start);
-    build();start();
+
+    const createStreams = () => {
+      width = window.innerWidth;
+      height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(width * dpr);
+      canvas.height = Math.round(height * dpr);
+      canvas.style.width = width + 'px';
+      canvas.style.height = height + 'px';
+      context.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const count = width < 700 ? 8 : 17;
+      streams = Array.from({ length: count }, (_, i) => {
+        const direction = i % 2 === 0 ? 1 : -1;
+        const row = (i * 0.61803398875) % 1;
+        const startX = direction > 0 ? -width * 0.2 : width * 1.2;
+        const endX = direction > 0 ? width * 1.2 : -width * 0.2;
+        const startY = height * (0.13 + row * 0.76);
+        const endY = height * (0.12 + ((row + 0.23 + (i % 3) * 0.13) % 0.78));
+        return {
+          startX, startY, endX, endY,
+          controlX: width * (0.30 + (i % 4) * 0.14),
+          controlY: height * (0.10 + ((i * 0.37) % 0.78)),
+          tint: i % 4 === 0 ? 'red' as const : 'blue' as const,
+          phase: (i * 0.381966) % 1,
+          duration: 18000 + (i % 5) * 3400,
+          opacity: i % 4 === 0 ? 0.09 : 0.11,
+        };
+      });
+    };
+
+    const render = (now: number) => {
+      context.clearRect(0, 0, width, height);
+      for (const stream of streams) {
+        const red = stream.tint === 'red';
+        const rgb = red ? '243,89,117' : '61,143,245';
+        context.beginPath();
+        context.moveTo(stream.startX, stream.startY);
+        context.quadraticCurveTo(stream.controlX, stream.controlY, stream.endX, stream.endY);
+        context.strokeStyle = 'rgba(' + rgb + ',' + stream.opacity + ')';
+        context.lineWidth = 0.9;
+        context.stroke();
+
+        const t = reducedMotion.matches ? stream.phase : (stream.phase + (now - startedAt) / stream.duration) % 1;
+        const p = pointOnCurve(stream, t);
+        const trail = pointOnCurve(stream, Math.max(0, t - 0.045));
+        const gradient = context.createLinearGradient(trail.x, trail.y, p.x, p.y);
+        gradient.addColorStop(0, 'rgba(' + rgb + ',0)');
+        gradient.addColorStop(1, 'rgba(' + rgb + ',0.50)');
+        context.beginPath();
+        context.moveTo(trail.x, trail.y);
+        context.lineTo(p.x, p.y);
+        context.strokeStyle = gradient;
+        context.lineWidth = 1.5;
+        context.stroke();
+
+        context.beginPath();
+        context.arc(p.x, p.y, 1.5, 0, Math.PI * 2);
+        context.fillStyle = 'rgba(' + rgb + ',0.38)';
+        context.fill();
+      }
+      if (!reducedMotion.matches && visible) frame = requestAnimationFrame(render);
+    };
+
+    const restart = () => {
+      cancelAnimationFrame(frame);
+      render(performance.now());
+    };
+    const resize = () => { createStreams(); restart(); };
+    const handleVisibility = () => { visible = !document.hidden; restart(); };
+
+    window.addEventListener('resize', resize, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibility);
+    reducedMotion.addEventListener('change', restart);
+    createStreams();
+    restart();
   }
 }
