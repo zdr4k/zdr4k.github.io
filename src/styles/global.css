@@ -583,3 +583,48 @@ footer {
     white-space: nowrap;
   }
 }
+
+/* Experimental original-layout capability grid (no other layout changes). */
+#capabilities { max-width: none; }
+#capabilities .section-heading { margin-bottom: 28px; }
+#capabilities .capabilities-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid #303137;
+}
+#capabilities .capability {
+  min-height: 174px;
+  padding: 24px 20px 26px 0;
+  border-bottom: 1px solid #303137;
+}
+#capabilities .capability:not(:nth-child(3n+1)) {
+  border-left: 1px solid #303137;
+  padding-left: 20px;
+}
+#capabilities .capability-num {
+  font: 11px ui-monospace, SFMono-Regular, Consolas, monospace;
+  color: #8c9ba3;
+}
+#capabilities .capability h3 {
+  margin: 19px 0 9px;
+  font-size: 17px;
+  line-height: 1.35;
+  letter-spacing: -.25px;
+}
+#capabilities .capability p {
+  margin: 0;
+  font-size: 13px;
+  color: #9fa3af;
+  line-height: 1.7;
+}
+@media(max-width:780px) {
+  #capabilities .capabilities-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #capabilities .capability:not(:nth-child(3n+1)) { border-left:0; padding-left:0; }
+  #capabilities .capability:nth-child(even) { border-left:1px solid #303137; padding-left:20px; }
+}
+@media(max-width:550px) {
+  #capabilities .capabilities-grid { grid-template-columns:1fr; }
+  #capabilities .capability, #capabilities .capability:nth-child(even) {
+    min-height:0; border-left:0; padding:22px 0;
+  }
+}

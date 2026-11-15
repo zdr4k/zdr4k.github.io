@@ -115,6 +115,7 @@ const pathname = Astro.url.pathname;
         }
     
         function drawConnections() {
+          // This neutral mesh is unchanged from the published original.
           for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
               const a = particles[i];
@@ -125,22 +126,70 @@ const pathname = Astro.url.pathname;
     
               if (dist < LINK_DISTANCE) {
                 const opacity = (1 - dist / LINK_DISTANCE) * 0.16;
-                const lineSeed = ((i + 1) * 37 + (j + 1) * 61 + i * j * 13) % 100;
-                const red = lineSeed < 12;
-                const blue = lineSeed >= 12 && lineSeed < 35;
-                // Keep original neutral connections unchanged. Increase only
-                // colored links' contrast so the accents are actually visible.
-                const rgb = red ? '244, 88, 122' : blue ? '66, 159, 255' : '170, 190, 255';
-                const lineOpacity = red || blue
-                  ? 0.12 + (1 - dist / LINK_DISTANCE) * 0.42
-                  : opacity;
-                ctx.strokeStyle = `rgba(${rgb}, ${lineOpacity})`;
-                ctx.lineWidth = red || blue ? 1.0 : 0.7;
+                ctx.strokeStyle = `rgba(170, 190, 255, ${opacity})`;
+                ctx.lineWidth = 0.7;
                 ctx.beginPath();
                 ctx.moveTo(a.x, a.y);
                 ctx.lineTo(b.x, b.y);
                 ctx.stroke();
               }
+            }
+          }
+        }
+
+        // Sparse directional attack/defense "paths" along real mesh edges.
+        // No extra particles, destinations, glows, or new movement system.
+        function drawTrafficPaths() {
+          const textAreas = Array.from(document.querySelectorAll(
+            'h1, .intro, .hero-role, .section-heading, .section-lead, .capability, .editorial-row, .project-card, .article, .socials'
+          )).map(el => el.getBoundingClientRect()).filter(r =>
+            r.bottom > 0 && r.top < height && r.right > 0 && r.left < width
+          );
+          const underText = (x, y) => textAreas.some(r =>
+            x > r.left - 18 && x < r.right + 18 &&
+            y > r.top - 16 && y < r.bottom + 16
+          );
+          const network = particles.map((a, i) => particles
+            .map((b, j) => ({
+              j, distance: Math.hypot(a.x - b.x, a.y - b.y)
+            }))
+            .filter(e => e.j !== i && e.distance < LINK_DISTANCE)
+            .sort((a, b) => a.distance - b.distance));
+          const zones = [
+            { x: 0.10, y: 0.27, rgb: '70, 150, 245' },
+            { x: 0.88, y: 0.24, rgb: '235, 85, 110' },
+            { x: 0.12, y: 0.77, rgb: '235, 85, 110' },
+            { x: 0.86, y: 0.78, rgb: '70, 150, 245' },
+          ];
+          for (const zone of zones) {
+            // Prefer local groups outside readable content.
+            const candidates = particles.map((p, i) => ({
+              i, score: Math.hypot(p.x - width * zone.x, p.y - height * zone.y)
+            })).filter(({i}) => network[i].length >= 2 && !underText(particles[i].x, particles[i].y))
+              .sort((a, b) => a.score - b.score);
+            if (!candidates.length) continue;
+            let from = candidates[0].i;
+            let previous = -1;
+            // Two or three connected segments form a path, not random color noise.
+            for (let hop = 0; hop < 3; hop++) {
+              const options = network[from].filter(({j}) =>
+                j !== previous && !underText(particles[j].x, particles[j].y) &&
+                !underText((particles[from].x + particles[j].x) / 2,
+                           (particles[from].y + particles[j].y) / 2)
+              );
+              if (!options.length) break;
+              const to = options[Math.min(hop % 2, options.length - 1)].j;
+              const a = particles[from], b = particles[to];
+              const distance = Math.hypot(a.x - b.x, a.y - b.y);
+              const strength = 1 - distance / LINK_DISTANCE;
+              ctx.strokeStyle = `rgba(${zone.rgb}, ${0.08 + strength * 0.17})`;
+              ctx.lineWidth = 0.85;
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
+              ctx.stroke();
+              previous = from;
+              from = to;
             }
           }
         }
@@ -158,6 +207,7 @@ const pathname = Astro.url.pathname;
           drawBackground();
           updateParticles();
           drawConnections();
+          drawTrafficPaths();
           drawParticles();
           animationFrame = requestAnimationFrame(draw);
         }
