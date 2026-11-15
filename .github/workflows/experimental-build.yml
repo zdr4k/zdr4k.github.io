@@ -1,0 +1,19 @@
+name: Experimental homepage build
+on:
+  push:
+    branches:
+      - experiment/cyber-telemetry-home
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Astro site
+        uses: withastro/action@v6
+        with:
+          package-manager: npm@latest

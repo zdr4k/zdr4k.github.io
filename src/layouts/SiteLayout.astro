@@ -1,8 +1,8 @@
 ---
 import site from '../data/site.json';
 import '../styles/global.css';
-interface Props { title?: string; description?: string; }
-const { title = 'Kelvin Santos — Security Engineer', description = site.intro } = Astro.props;
+interface Props { title?: string; description?: string; visualMode?: 'telemetry' | 'default'; }
+const { title = 'Kelvin Santos — SOC Engineer', description = site.intro, visualMode = 'default' } = Astro.props;
 const pathname = Astro.url.pathname;
 ---
 <!doctype html>
@@ -18,8 +18,9 @@ const pathname = Astro.url.pathname;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
   </head>
-  <body>
-    <canvas id="lab-bg" aria-hidden="true"></canvas>
+  <body class={visualMode === "telemetry" ? "theme-telemetry" : undefined}>
+    {visualMode === "telemetry" && <canvas id="telemetry-bg" aria-hidden="true"></canvas>}
+    {visualMode !== "telemetry" && <canvas id="lab-bg" aria-hidden="true"></canvas>}
     <div class="bg-vignette" aria-hidden="true"></div>
     <div class="container">
       <header class="header">
@@ -36,6 +37,7 @@ const pathname = Astro.url.pathname;
       <footer><span>© {new Date().getFullYear()} Kelvin Santos</span><span class="footer-links"><a href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a><a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a><a href={site.medium} target="_blank" rel="noopener noreferrer">Medium</a></span></footer>
     </div>
     <script>
+      import "../scripts/telemetry.ts";
       (() => {
         const canvas = document.getElementById('lab-bg');
         if (!canvas) return;
