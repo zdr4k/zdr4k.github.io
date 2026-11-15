@@ -260,31 +260,44 @@ const pathname = Astro.url.pathname;
           const fadeOut = 1 - smoothstep((age - 5700) / 750);
           const fade = fadeIn * fadeOut;
 
-          // Each colored path grows one local mesh edge at a time. It remains
-          // attached to moving particles: there are no separate overlay curves.
+          // Draw a continuous route from its origin toward the SAME hub.
+          // Every visible edge shares one opacity: individual segments no
+          // longer disappear while neighboring segments stay illuminated.
           function drawRoute(indices, progress, rgb, alpha) {
             const segments = indices.length - 1;
             const traveled = progress * segments;
+            const opacity = alpha * fade;
+            if (opacity < .002) return;
+
+            ctx.strokeStyle = `rgba(${rgb}, ${opacity})`;
+            ctx.lineWidth = 1.25;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            const origin = particles[indices[0]];
+            ctx.moveTo(origin.x, origin.y);
+
+            let tipX = origin.x;
+            let tipY = origin.y;
             for (let i = 0; i < segments; i++) {
               const amount = Math.max(0, Math.min(1, traveled - i));
-              if (amount <= 0) continue;
-              const a = particles[indices[i]], b = particles[indices[i+1]];
-              const distance = Math.hypot(a.x-b.x,a.y-b.y);
-              // Graceful fading if a moving edge becomes too long.
-              const proximity = smoothstep(
-                (LINK_DISTANCE - distance) / (LINK_DISTANCE * .32)
-              );
-              const opacity = alpha * fade * proximity;
-              if (opacity < .002) continue;
+              if (amount <= 0) break;
+              const a = particles[indices[i]];
+              const b = particles[indices[i + 1]];
+              tipX = a.x + (b.x - a.x) * amount;
+              tipY = a.y + (b.y - a.y) * amount;
+              ctx.lineTo(tipX, tipY);
+              if (amount < 1) break;
+            }
+            ctx.stroke();
+
+            // The response has one clear advancing tip, not isolated sparks
+            // on disconnected edges. A tiny point helps track its direction.
+            if (progress > 0 && progress < 1) {
+              ctx.fillStyle = `rgba(${rgb}, ${opacity * .8})`;
               ctx.beginPath();
-              ctx.moveTo(a.x,a.y);
-              ctx.lineTo(
-                a.x+(b.x-a.x)*amount,
-                a.y+(b.y-a.y)*amount
-              );
-              ctx.strokeStyle = `rgba(${rgb}, ${opacity})`;
-              ctx.lineWidth = 1.25;
-              ctx.stroke();
+              ctx.arc(tipX, tipY, 1.7, 0, Math.PI * 2);
+              ctx.fill();
             }
           }
 
