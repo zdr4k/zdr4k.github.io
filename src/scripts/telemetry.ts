@@ -167,7 +167,7 @@ if (canvas) {
 
       // Detection/interception: a small blue ring absorbs red/blue arrivals.
       hubs.forEach((hub,i)=>{
-        const phase=reduced.matches?.5:(Math.sin(elapsed*.0010+hub.phase)+1)/2;
+        const phase = reduced.matches ? 0.5 : (Math.sin(elapsed * .0010 + hub.phase) + 1) / 2;
         const size=9+phase*6;
         const halo=ctx.createRadialGradient(hub.x,hub.y,0,hub.x,hub.y,44);
         halo.addColorStop(0,'rgba(101,184,242,'+(.17+phase*.12)+')');
