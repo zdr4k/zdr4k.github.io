@@ -554,3 +554,32 @@ footer {
 #experience .editorial-row{padding:24px 0}
 #skills .skill-row{min-height:114px}
 @media(max-width:650px){.hero-role{font-size:23px;margin:-5px 0 13px}.about-section .section-lead{font-size:16px;line-height:1.85}#skills .skill-row{min-height:0}}
+
+
+/* Mobile navigation: brand on its own row, five links below */
+@media (max-width: 650px) {
+  .header {
+    height: auto;
+    min-height: 108px;
+    padding: 17px 0 14px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 18px;
+  }
+  .header .brand {
+    align-self: flex-start;
+    white-space: nowrap;
+  }
+  .header nav {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .header nav a {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+}
