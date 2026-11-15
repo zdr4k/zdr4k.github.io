@@ -69,8 +69,18 @@ const pathname = Astro.url.pathname;
         const MOUSE_RADIUS = 140;
     
         function resize() {
-          width = window.innerWidth;
-          height = window.innerHeight;
+          const nextWidth = window.innerWidth;
+          // Mobile browsers change innerHeight as the address bar collapses
+          // during scrolling. Use the stable screen height so the canvas
+          // already covers the expanded viewport without recreating particles.
+          const nextHeight = isMobile
+            ? Math.max(window.innerHeight, window.screen.height || 0)
+            : window.innerHeight;
+          // Only recreate the scene if the actual canvas dimensions change
+          // (including mobile orientation changes), not on normal scrolling.
+          if (nextWidth === width && nextHeight === height) return;
+          width = nextWidth;
+          height = nextHeight;
           canvas.width = width * Math.min(window.devicePixelRatio || 1, 2);
           canvas.height = height * Math.min(window.devicePixelRatio || 1, 2);
           canvas.style.width = width + 'px';
