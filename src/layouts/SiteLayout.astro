@@ -59,7 +59,12 @@ const pathname = Astro.url.pathname;
         const SCENE_PAUSE_MIN = 1600;
         const SCENE_PAUSE_MAX = 3800;
     
-        const PARTICLE_COUNT = reduceMotion ? 0 : isMobile ? 66 : 132;
+        // Scale desktop particle density with the visible CSS viewport area.
+        // At 90% browser zoom the viewport covers roughly 23% more CSS area
+        // than at 100%, so it also receives ~23% more neutral particles.
+        // Keep mobile unchanged and cap unusually large desktop displays.
+        const desktopParticleCount = () => Math.max(110, Math.min(240,
+          Math.round(146 * (width * height) / (1800 * 900))));
         const LINK_DISTANCE = isMobile ? 126 : 158;
         const MOUSE_RADIUS = 140;
     
@@ -83,7 +88,8 @@ const pathname = Astro.url.pathname;
     
         function createParticles() {
           particles = [];
-          for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const count = reduceMotion ? 0 : isMobile ? 66 : desktopParticleCount();
+          for (let i = 0; i < count; i++) {
             particles.push({
               x: random(0, width),
               y: random(0, height),
