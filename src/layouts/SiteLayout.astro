@@ -54,10 +54,10 @@ const pathname = Astro.url.pathname;
         // Quiet, occasional attack -> detection -> defense sequences.
         // The mesh itself stays the original softly animated particle network.
         let threatScene = null;
-        let nextSceneAt = performance.now() + 1800;
-        const SCENE_DURATION = 6900;
-        const SCENE_PAUSE_MIN = 5500;
-        const SCENE_PAUSE_MAX = 8000;
+        let nextSceneAt = performance.now() + 900;
+        const SCENE_DURATION = 6500;
+        const SCENE_PAUSE_MIN = 1300;
+        const SCENE_PAUSE_MAX = 2500;
     
         const PARTICLE_COUNT = reduceMotion ? 0 : isMobile ? 54 : 102;
         const LINK_DISTANCE = isMobile ? 120 : 150;
@@ -181,7 +181,7 @@ const pathname = Astro.url.pathname;
 
           // Choose a living node near the margins, not a fixed visual hub.
           const hubs = particles.map((p, i) => i).filter(i =>
-            eligible[i] && adjacency[i].length >= 3 &&
+            eligible[i] && adjacency[i].length >= 2 &&
             (particles[i].x < width * .31 || particles[i].x > width * .69)
           );
 
@@ -197,14 +197,14 @@ const pathname = Astro.url.pathname;
                 if (!options.length) break;
                 trail.push(options[Math.floor(Math.random()*options.length)]);
               }
-              if(trail.length >= 4 && (!best || trail.length > best.length))
+              if(trail.length >= 3 && (!best || trail.length > best.length))
                 best = trail;
               if(best && best.length >= 5) break;
             }
             return best ? best.reverse() : null;
           }
 
-          for (let attempt = 0; attempt < 35 && hubs.length; attempt++) {
+          for (let attempt = 0; attempt < 75 && hubs.length; attempt++) {
             const hub = hubs[Math.floor(Math.random()*hubs.length)];
             const exits = adjacency[hub].slice();
             if (exits.length < 2) continue;
@@ -225,7 +225,7 @@ const pathname = Astro.url.pathname;
                 }
               }
             }
-            if (!opposite || bestAngle > .15) continue;
+            if (!opposite || bestAngle > .65) continue;
             const attack = growFromHub(hub, opposite[0], new Set([opposite[1]]));
             if (!attack) continue;
             const defense = growFromHub(
@@ -237,7 +237,7 @@ const pathname = Astro.url.pathname;
               threatType: Math.random() < .30 ? 'purple' : 'red' };
             return;
           }
-          nextSceneAt = now + 2200;
+          nextSceneAt = now + 750;
         }
 
         function drawThreatScene(now) {
@@ -257,7 +257,7 @@ const pathname = Astro.url.pathname;
           }
 
           const fadeIn = smoothstep(age / 650);
-          const fadeOut = 1 - smoothstep((age - 5800) / 1050);
+          const fadeOut = 1 - smoothstep((age - 5700) / 750);
           const fade = fadeIn * fadeOut;
 
           // Each colored path grows one local mesh edge at a time. It remains
@@ -290,8 +290,8 @@ const pathname = Astro.url.pathname;
 
           // Intrusion -> detection -> blue response -> contained -> calm.
           const attackProgress = smoothstep(age / 2600);
-          const defenseProgress = smoothstep((age - 3000) / 2350);
-          const containment = smoothstep((age - 5050) / 850);
+          const defenseProgress = smoothstep((age - 2350) / 2450);
+          const containment = smoothstep((age - 4750) / 850);
           const threatColor = scene.threatType === 'purple'
             ? '168, 102, 255'
             : '245, 92, 118';
