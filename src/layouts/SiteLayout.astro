@@ -51,9 +51,21 @@ const pathname = Astro.url.pathname;
         let animationFrame = 0;
         let particles = [];
         let mouse = { x: -9999, y: -9999 };
+        // Quiet, occasional attack -> detection -> defense sequences.
+        // The mesh itself stays the original softly animated particle network.
+        let threatScene = null;
+        let nextSceneAt = performance.now() + 900;
+        const SCENE_DURATION = 5800;
+        const SCENE_PAUSE_MIN = 1600;
+        const SCENE_PAUSE_MAX = 3800;
     
-        const PARTICLE_COUNT = reduceMotion ? 0 : isMobile ? 42 : 78;
-        const LINK_DISTANCE = isMobile ? 120 : 150;
+        // Scale desktop particle density with the visible CSS viewport area.
+        // At 90% browser zoom the viewport covers roughly 23% more CSS area
+        // than at 100%, so it also receives ~23% more neutral particles.
+        // Keep mobile unchanged and cap unusually large desktop displays.
+        const desktopParticleCount = () => Math.max(125, Math.min(275,
+          Math.round(170 * (width * height) / (1800 * 900))));
+        const LINK_DISTANCE = isMobile ? 126 : 158;
         const MOUSE_RADIUS = 140;
     
         function resize() {
@@ -66,6 +78,8 @@ const pathname = Astro.url.pathname;
           ctx.setTransform(1, 0, 0, 1, 0, 0);
           ctx.scale(Math.min(window.devicePixelRatio || 1, 2), Math.min(window.devicePixelRatio || 1, 2));
           createParticles();
+          threatScene = null;
+          nextSceneAt = performance.now() + 2600;
         }
     
         function random(min, max) {
@@ -74,7 +88,8 @@ const pathname = Astro.url.pathname;
     
         function createParticles() {
           particles = [];
-          for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const count = reduceMotion ? 0 : isMobile ? 74 : desktopParticleCount();
+          for (let i = 0; i < count; i++) {
             particles.push({
               x: random(0, width),
               y: random(0, height),
@@ -115,6 +130,7 @@ const pathname = Astro.url.pathname;
         }
     
         function drawConnections() {
+          // This neutral mesh is unchanged from the published original.
           for (let i = 0; i < particles.length; i++) {
             for (let j = i + 1; j < particles.length; j++) {
               const a = particles[i];
@@ -124,7 +140,7 @@ const pathname = Astro.url.pathname;
               const dist = Math.sqrt(dx * dx + dy * dy);
     
               if (dist < LINK_DISTANCE) {
-                const opacity = (1 - dist / LINK_DISTANCE) * 0.16;
+                const opacity = (1 - dist / LINK_DISTANCE) * 0.18;
                 ctx.strokeStyle = `rgba(170, 190, 255, ${opacity})`;
                 ctx.lineWidth = 0.7;
                 ctx.beginPath();
@@ -135,7 +151,192 @@ const pathname = Astro.url.pathname;
             }
           }
         }
-    
+
+        // Real attack and response paths inside the ORIGINAL organic mesh.
+        // There is at most one short event, followed by a long calm interval.
+        const smoothstep = t => {
+          const n = Math.max(0, Math.min(1, t));
+          return n * n * (3 - 2 * n);
+        };
+
+        function startThreatScene(now) {
+          const blockers = Array.from(document.querySelectorAll(
+            'h1, .intro, .hero-role, .section-heading, .section-lead, ' +
+            '.capability, .editorial-row, .project-card, .article, .socials'
+          )).map(el => el.getBoundingClientRect()).filter(r =>
+            r.bottom > 0 && r.top < height && r.right > 0 && r.left < width
+          );
+          const blocked = (x, y) => blockers.some(r =>
+            x >= r.left - 28 && x <= r.right + 28 &&
+            y >= r.top - 22 && y <= r.bottom + 22
+          );
+
+          const eligible = particles.map(p => !blocked(p.x, p.y));
+          // Conservative local edges remain stable even as nodes drift.
+          const adjacency = particles.map((p, i) => particles
+            .map((q, j) => ({
+              id: j,
+              distance: Math.hypot(p.x - q.x, p.y - q.y)
+            }))
+            .filter(e => e.id !== i && eligible[e.id] &&
+              e.distance < LINK_DISTANCE * .77 &&
+              !blocked((p.x + particles[e.id].x)/2,
+                       (p.y + particles[e.id].y)/2))
+            .map(e => e.id)
+          );
+
+          // Choose a living node near the margins, not a fixed visual hub.
+          const hubs = particles.map((p, i) => i).filter(i =>
+            eligible[i] && adjacency[i].length >= 2 &&
+            (particles[i].x < width * .31 || particles[i].x > width * .69)
+          );
+
+          function growFromHub(hub, initial, forbidden) {
+            let best = null;
+            // Explore varied connected branches to produce a 3-5 edge path.
+            for (let trial = 0; trial < 20; trial++) {
+              const trail = [hub, initial];
+              while (trail.length < 6) {
+                const current = trail[trail.length - 1];
+                const options = adjacency[current].filter(n =>
+                  !trail.includes(n) && !forbidden.has(n));
+                if (!options.length) break;
+                trail.push(options[Math.floor(Math.random()*options.length)]);
+              }
+              if(trail.length >= 3 && (!best || trail.length > best.length))
+                best = trail;
+              if(best && best.length >= 5) break;
+            }
+            return best ? best.reverse() : null;
+          }
+
+          for (let attempt = 0; attempt < 75 && hubs.length; attempt++) {
+            const hub = hubs[Math.floor(Math.random()*hubs.length)];
+            const exits = adjacency[hub].slice();
+            if (exits.length < 2) continue;
+
+            const hubP = particles[hub];
+            // Prefer distinct incoming directions, not two parallel routes.
+            let opposite = null, bestAngle = -2;
+            for (let a = 0; a < exits.length; a++) {
+              for (let b = a+1; b < exits.length; b++) {
+                const pa=particles[exits[a]], pb=particles[exits[b]];
+                const ax=pa.x-hubP.x, ay=pa.y-hubP.y;
+                const bx=pb.x-hubP.x, by=pb.y-hubP.y;
+                const dot=(ax*bx+ay*by) /
+                  Math.max(1,Math.hypot(ax,ay)*Math.hypot(bx,by));
+                if(dot < bestAngle || bestAngle === -2) {
+                  opposite=[exits[a],exits[b]];
+                  bestAngle=dot;
+                }
+              }
+            }
+            if (!opposite || bestAngle > .65) continue;
+            const attack = growFromHub(hub, opposite[0], new Set([opposite[1]]));
+            if (!attack) continue;
+            const defense = growFromHub(
+              hub, opposite[1], new Set(attack.slice(0,-1))
+            );
+            if (!defense) continue;
+
+            // Vary strength and tempo once per event, not per animation frame.
+            // This keeps each individual scene smooth but less repetitive.
+            const intensity = .68 + Math.random() * .38;
+            const tempo = .91 + Math.random() * .16;
+            threatScene = { red: attack, blue: defense, hub, start: now,
+              threatType: Math.random() < .30 ? 'purple' : 'red',
+              intensity, tempo, duration: SCENE_DURATION * tempo };
+            return;
+          }
+          nextSceneAt = now + 750;
+        }
+
+        function drawThreatScene(now) {
+          if (reduceMotion) return;
+          if (!threatScene) {
+            if (now >= nextSceneAt) startThreatScene(now);
+            if (!threatScene) return;
+          }
+
+          const scene = threatScene;
+          const age = now - scene.start;
+          if (age >= scene.duration) {
+            threatScene = null;
+            nextSceneAt = now + SCENE_PAUSE_MIN +
+              Math.random() * (SCENE_PAUSE_MAX - SCENE_PAUSE_MIN);
+            return;
+          }
+
+          const sceneAge = age / scene.tempo;
+          const fadeIn = smoothstep(sceneAge / 650);
+          const fadeOut = 1 - smoothstep((sceneAge - 5000) / 750);
+          const fade = fadeIn * fadeOut;
+
+          // Draw a continuous route from its origin toward the SAME hub.
+          // Every visible edge shares one opacity: individual segments no
+          // longer disappear while neighboring segments stay illuminated.
+          function drawRoute(indices, progress, rgb, alpha) {
+            const segments = indices.length - 1;
+            const traveled = progress * segments;
+            const opacity = alpha * fade;
+            if (opacity < .002) return;
+
+            ctx.strokeStyle = `rgba(${rgb}, ${opacity})`;
+            ctx.lineWidth = 1.25;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            const origin = particles[indices[0]];
+            ctx.moveTo(origin.x, origin.y);
+
+            let tipX = origin.x;
+            let tipY = origin.y;
+            for (let i = 0; i < segments; i++) {
+              const amount = Math.max(0, Math.min(1, traveled - i));
+              if (amount <= 0) break;
+              const a = particles[indices[i]];
+              const b = particles[indices[i + 1]];
+              tipX = a.x + (b.x - a.x) * amount;
+              tipY = a.y + (b.y - a.y) * amount;
+              ctx.lineTo(tipX, tipY);
+              if (amount < 1) break;
+            }
+            ctx.stroke();
+
+            // The response has one clear advancing tip, not isolated sparks
+            // on disconnected edges. A tiny point helps track its direction.
+            if (progress > 0 && progress < 1) {
+              ctx.fillStyle = `rgba(${rgb}, ${opacity * .8})`;
+              ctx.beginPath();
+              ctx.arc(tipX, tipY, 1.7, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          // Intrusion -> detection -> blue response -> contained -> calm.
+          const attackProgress = smoothstep(sceneAge / 2600);
+          const defenseProgress = smoothstep((sceneAge - 2200) / 2450);
+          const containment = smoothstep((sceneAge - 4750) / 650);
+          const threatColor = scene.threatType === 'purple'
+            ? '168, 102, 255'
+            : '245, 92, 118';
+          const threatOpacity = scene.threatType === 'purple' ? .54 : .56;
+          drawRoute(scene.red, attackProgress, threatColor,
+            threatOpacity * scene.intensity * (1 - containment * .88));
+          drawRoute(scene.blue, defenseProgress, '84, 163, 255', .58 * scene.intensity);
+
+          const ring = smoothstep((sceneAge - 2380) / 350) *
+            (1 - smoothstep((sceneAge - 3350) / 700)) * fade;
+          if (ring > .003) {
+            const p = particles[scene.hub];
+            ctx.beginPath();
+            ctx.arc(p.x,p.y,4.2,0,Math.PI*2);
+            ctx.strokeStyle = `rgba(166, 206, 255, ${ring * .30})`;
+            ctx.lineWidth = .95;
+            ctx.stroke();
+          }
+        }
+
         function drawParticles() {
           for (const p of particles) {
             ctx.fillStyle = 'rgba(220, 228, 255, 0.38)';
@@ -149,6 +350,7 @@ const pathname = Astro.url.pathname;
           drawBackground();
           updateParticles();
           drawConnections();
+          drawThreatScene(performance.now());
           drawParticles();
           animationFrame = requestAnimationFrame(draw);
         }

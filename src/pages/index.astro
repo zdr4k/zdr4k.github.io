@@ -27,10 +27,14 @@ const articles=(Object.entries(articleFiles) as [string,Article][]).sort(([a],[b
     <p class="section-lead">{site.about}</p>
     <div class="about-links"><a href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn ↗</a><a href={site.github} target="_blank" rel="noopener noreferrer">GitHub ↗</a></div>
   </section>}
-  <section class="section editorial-section" id="skills" aria-labelledby="skills-title">
-    <div class="section-heading"><div><div class="section-kicker">02 / CORE CAPABILITIES</div><h2 id="skills-title">What I work with</h2></div></div>
-    <div class="skills-list">
-      {site.skills.map((item, i)=><div class="skill-row"><span class="row-index">{String(i+1).padStart(2,'0')}</span><div><h3>{item.title}</h3><p>{item.detail}</p></div></div>)}
+  <section class="section editorial-section" id="capabilities" aria-labelledby="capabilities-title">
+    <div class="section-heading"><div><div class="section-kicker">02 / CORE CAPABILITIES</div><h2 id="capabilities-title">What I work with</h2></div></div>
+    <div class="capabilities-grid">
+      {site.skills.map((skill,i) => <div class="capability">
+        <span class="capability-num">/ {String(i+1).padStart(2,'0')}</span>
+        <h3>{skill.title}</h3>
+        <p>{skill.detail}</p>
+      </div>)}
     </div>
   </section>
   <section class="section editorial-section" id="experience" aria-labelledby="experience-title">
