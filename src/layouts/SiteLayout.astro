@@ -283,22 +283,22 @@ const pathname = Astro.url.pathname;
                 a.y+(b.y-a.y)*amount
               );
               ctx.strokeStyle = `rgba(${rgb}, ${opacity})`;
-              ctx.lineWidth = 1.0;
+              ctx.lineWidth = 1.25;
               ctx.stroke();
             }
           }
 
           // Intrusion -> detection -> blue response -> contained -> calm.
           const attackProgress = smoothstep(age / 2600);
-          const defenseProgress = smoothstep((age - 2350) / 2450);
+          const defenseProgress = smoothstep((age - 2200) / 2450);
           const containment = smoothstep((age - 4750) / 850);
           const threatColor = scene.threatType === 'purple'
             ? '168, 102, 255'
             : '245, 92, 118';
-          const threatOpacity = scene.threatType === 'purple' ? .44 : .46;
+          const threatOpacity = scene.threatType === 'purple' ? .54 : .56;
           drawRoute(scene.red, attackProgress, threatColor,
             threatOpacity * (1 - containment * .88));
-          drawRoute(scene.blue, defenseProgress, '84, 163, 255', .48);
+          drawRoute(scene.blue, defenseProgress, '84, 163, 255', .58);
 
           const ring = smoothstep((age - 2380) / 350) *
             (1 - smoothstep((age - 3350) / 700)) * fade;
