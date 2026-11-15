@@ -54,10 +54,10 @@ const pathname = Astro.url.pathname;
         // Quiet, occasional attack -> detection -> defense sequences.
         // The mesh itself stays the original softly animated particle network.
         let threatScene = null;
-        let nextSceneAt = performance.now() + 2600;
-        const SCENE_DURATION = 7200;
-        const SCENE_PAUSE_MIN = 9000;
-        const SCENE_PAUSE_MAX = 12000;
+        let nextSceneAt = performance.now() + 1800;
+        const SCENE_DURATION = 6900;
+        const SCENE_PAUSE_MIN = 5500;
+        const SCENE_PAUSE_MAX = 8000;
     
         const PARTICLE_COUNT = reduceMotion ? 0 : isMobile ? 54 : 102;
         const LINK_DISTANCE = isMobile ? 120 : 150;
@@ -233,7 +233,8 @@ const pathname = Astro.url.pathname;
             );
             if (!defense) continue;
 
-            threatScene = { red: attack, blue: defense, hub, start: now };
+            threatScene = { red: attack, blue: defense, hub, start: now,
+              threatType: Math.random() < .30 ? 'purple' : 'red' };
             return;
           }
           nextSceneAt = now + 2200;
@@ -256,7 +257,7 @@ const pathname = Astro.url.pathname;
           }
 
           const fadeIn = smoothstep(age / 650);
-          const fadeOut = 1 - smoothstep((age - 6150) / 1000);
+          const fadeOut = 1 - smoothstep((age - 5800) / 1050);
           const fade = fadeIn * fadeOut;
 
           // Each colored path grows one local mesh edge at a time. It remains
@@ -291,9 +292,13 @@ const pathname = Astro.url.pathname;
           const attackProgress = smoothstep(age / 2600);
           const defenseProgress = smoothstep((age - 3000) / 2350);
           const containment = smoothstep((age - 5050) / 850);
-          drawRoute(scene.red, attackProgress, '235, 85, 110',
-            .34 * (1 - containment * .88));
-          drawRoute(scene.blue, defenseProgress, '70, 150, 245', .36);
+          const threatColor = scene.threatType === 'purple'
+            ? '168, 102, 255'
+            : '245, 92, 118';
+          const threatOpacity = scene.threatType === 'purple' ? .44 : .46;
+          drawRoute(scene.red, attackProgress, threatColor,
+            threatOpacity * (1 - containment * .88));
+          drawRoute(scene.blue, defenseProgress, '84, 163, 255', .48);
 
           const ring = smoothstep((age - 2380) / 350) *
             (1 - smoothstep((age - 3350) / 700)) * fade;
@@ -301,8 +306,8 @@ const pathname = Astro.url.pathname;
             const p = particles[scene.hub];
             ctx.beginPath();
             ctx.arc(p.x,p.y,4.2,0,Math.PI*2);
-            ctx.strokeStyle = `rgba(146, 197, 240, ${ring * .23})`;
-            ctx.lineWidth = .8;
+            ctx.strokeStyle = `rgba(166, 206, 255, ${ring * .30})`;
+            ctx.lineWidth = .95;
             ctx.stroke();
           }
         }
