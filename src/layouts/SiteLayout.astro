@@ -126,13 +126,16 @@ const pathname = Astro.url.pathname;
               if (dist < LINK_DISTANCE) {
                 const opacity = (1 - dist / LINK_DISTANCE) * 0.16;
                 const lineSeed = ((i + 1) * 37 + (j + 1) * 61 + i * j * 13) % 100;
-                const rgb = lineSeed < 5
-                  ? '235, 85, 110'    // red: 5%
-                  : lineSeed < 15
-                    ? '70, 150, 245'  // blue: 10%
-                    : '170, 190, 255'; // original: 85%
-                ctx.strokeStyle = `rgba(${rgb}, ${opacity})`;
-                ctx.lineWidth = 0.7;
+                const red = lineSeed < 12;
+                const blue = lineSeed >= 12 && lineSeed < 35;
+                // Keep original neutral connections unchanged. Increase only
+                // colored links' contrast so the accents are actually visible.
+                const rgb = red ? '244, 88, 122' : blue ? '66, 159, 255' : '170, 190, 255';
+                const lineOpacity = red || blue
+                  ? 0.12 + (1 - dist / LINK_DISTANCE) * 0.42
+                  : opacity;
+                ctx.strokeStyle = `rgba(${rgb}, ${lineOpacity})`;
+                ctx.lineWidth = red || blue ? 1.0 : 0.7;
                 ctx.beginPath();
                 ctx.moveTo(a.x, a.y);
                 ctx.lineTo(b.x, b.y);
