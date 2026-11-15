@@ -712,3 +712,10 @@ footer {
  .theme-telemetry #projects .project-grid{grid-template-columns:1fr}
  .theme-telemetry #projects .project-card:last-child{grid-column:auto}
 }
+
+/* Original background visibility on the experimental homepage.
+   The earlier V3 layer reduced the canvas to 80% opacity. */
+.theme-telemetry #telemetry-bg { opacity: 1; }
+.theme-telemetry .bg-vignette {
+  background: radial-gradient(circle at 50% 30%, rgba(34, 211, 238, 0.025), transparent 40%);
+}
